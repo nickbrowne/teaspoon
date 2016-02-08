@@ -20,7 +20,9 @@ module Teaspoon
     end
 
     def failures?
-      !execute
+      results = !execute
+      @server.shutdown
+      results
     end
 
     def execute(options = {})

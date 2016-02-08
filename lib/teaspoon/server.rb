@@ -14,14 +14,19 @@ module Teaspoon
     def start
       return if responsive?
 
-      thread = Thread.new do
-        disable_logging
+      @pid = fork do
         server = Rack::Server.new(rack_options)
         server.start
       end
-      wait_until_started(thread)
+
+      wait_until_responsive
     rescue => e
       raise Teaspoon::ServerError.new(desc: e.message)
+    end
+
+    def shutdown
+      Process.kill("TERM", @pid)
+      Process.wait2(@pid)
     end
 
     def responsive?
@@ -37,8 +42,8 @@ module Teaspoon
 
     protected
 
-    def wait_until_started(thread)
-      Timeout.timeout(Teaspoon.configuration.server_timeout.to_i) { thread.join(0.1) until responsive? }
+    def wait_until_responsive
+      Timeout.timeout(Teaspoon.configuration.server_timeout.to_i) { puts("waiting") until responsive? }
     rescue Timeout::Error
       raise Timeout::Error.new("consider increasing the timeout with `config.server_timeout`")
     end
