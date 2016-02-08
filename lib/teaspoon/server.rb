@@ -43,7 +43,7 @@ module Teaspoon
     protected
 
     def wait_until_responsive
-      Timeout.timeout(Teaspoon.configuration.server_timeout.to_i) { puts("waiting") until responsive? }
+      Timeout.timeout(Teaspoon.configuration.server_timeout.to_i) { while !responsive?; end }
     rescue Timeout::Error
       raise Timeout::Error.new("consider increasing the timeout with `config.server_timeout`")
     end
