@@ -14,14 +14,18 @@ module Teaspoon
     def start
       return if responsive?
 
-      thread = Thread.new do
+      @thread = Thread.new do
         disable_logging
         server = Rack::Server.new(rack_options)
         server.start
       end
-      wait_until_started(thread)
+      wait_until_started(@thread)
     rescue => e
       raise Teaspoon::ServerError.new(desc: e.message)
+    end
+
+    def stop
+      Thread.kill(@thread)
     end
 
     def responsive?
